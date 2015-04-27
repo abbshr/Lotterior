@@ -11,12 +11,13 @@ var EventEmitter = require('events').EventEmitter;
  * @levels: levels of the rewards with people numbers, e.g. [ 1, 2, 3 ]
  * @pool: rewards pool, e.g. [{body}, {body}, ...]
  * @candidates: set the winner by hands, e.g. ["ran", "hr"]
- * @algorithm: winners selecting algorithm
+ * @algorithm: winners-select-algorithm, use builtin or custom algorithm, default to "IN-ORDER"
  *
  */
 var Lotterior = module.exports = function (options) {
   if (this.constructor !== Lotterior)
     return new Lotterior(options);
+
   this._id = options.id;
   this._summary = util.isNumber(options.summary) && options.summary > 0 ? options.summary : 0;
   this._round = util.isNumber(options.round) && options.round > 0 ? options.round : 1;
@@ -24,7 +25,13 @@ var Lotterior = module.exports = function (options) {
   this._levels = util.isArray(options.levels) ? options.levels : [1];
   this._pool = util.isArray(options.pool) ? options.pool : [];
   this._candidates = util.isArray(options.candidates) ? options.candidates : [];
-  this._algorithm = util.isFunction(options._algorithm) ? options._algorithm : this._default;
+
+  if (util.isString(options.algorithm))
+    this._algorithm = this._builtInAlgorithm[options.algorithm] || this._builtInAlgorithm['IN-ORDER'];
+  else if (util.isFunction(options.algorithm))
+    this._algorithm = options.algorithm;
+  else
+    this._algorithm = this._builtInAlgorithm['IN-ORDER'];
 };
 
 util.inherits(Lotterior, EventEmitter);
@@ -69,8 +76,10 @@ Lotterior.prototype.config = function (options) {
     this._pool = options.pool;
   if (util.isArray(options.candidates))
     this._candidates = options.candidates;
-  if (util.isFunction(options._algorithm))
-    this._algorithm = options._algorithm;
+  if (util.isString(options.algorithm))
+    this._algorithm = this._builtInAlgorithm[options.algorithm] || this._builtInAlgorithm['IN-ORDER'];
+  else if (util.isFunction(options.algorithm))
+    this._algorithm = options.algorithm;
   return this;
 };
 
@@ -102,27 +111,71 @@ Lotterior.prototype.wait = function () {
 
 // run directly
 Lotterior.prototype.lottery = function () {
+  // stop the looping
+  clearInterval(this._loop);
+  delete this._loop;
   this._lottery();
 };
 
-Lotterior.prototype._lottery = function () {  
+Lotterior.prototype._lottery = function () {
   if (this._candidates.length)
     this.emit('ERNIE', this._candidates);
   else
-    this.emit('ERNIE', this._algorithm(this._pool, this._levels, this._max));
+    this.emit('ERNIE', this._algorithm(this._pool, this._levels));
 };
 
+Lotterior.prototype._builtInAlgorithm = {
+  "RANDOM": function (collection, levels) {
+    var max = collection.length;
+    var ret = [];
+    var random_num;
 
-// default lottery algorithm
-Lotterior.prototype._default = function (collection, levels, max) {
-  /*var winner;
-  // get a random head-index
-  var index = hat.rack(5, 10)() % max;
-  var offset = index + levels - max;
-  if (offset > 0)
-    winner = collection.slice(index).concat(collection.slice(0, offset));
-  else
-    winner = collection.slice(index, index + levels);
+    return levels.map(function (count) {
+      var num_ref = [];
+      for (var i = 0; i < count; i++) {
+        while (max > ret.filter(function (sign) { return sign; }).length) {
+          random_num = parseInt(Math.random() * max);
+          if (ret[random_num]) continue;
+          ret[random_num] = true;
+          num_ref.push(random_num);
+          break;
+        }
+      }
+      return num_ref.map(function (index) {
+        return collection[index];
+      });
+    });
+  },
 
-  return winner;*/
+  "IN-ORDER": function (collection, levels) {
+    var max = collection.length;
+    var fst = parseInt(Math.random() * max);
+    var index = fst;
+
+    return levels.map(function (count) {
+      if (fst != index && fst == (index %= max))
+        return [];
+      
+      var offset = index + count - max;
+      if (offset > 0) {
+        if (offset >= fst + 1) offset = fst;
+        tmp_index = index;
+        index += count;
+        return collection.slice(tmp_index).concat(collection.slice(0, offset));
+      } else {
+        if (count > fst + 1) count = fst;
+        return collection.slice(index, index += count);
+      }
+    });
+
+  }
+   // "FIXED-OFFSET", "FROM-POSITION", "REVERSE"
+};
+
+// view of random numbers
+Lotterior.prototype.looping = function (interval, callback) {
+  var max = this._pool.length;
+  this._loop = setInterval(function () {
+    callback(parseInt(Math.random() * max));
+  }, interval);
 };
