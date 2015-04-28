@@ -134,7 +134,7 @@ Lotterior.prototype._builtInAlgorithm = {
       var num_ref = [];
       for (var i = 0; i < count; i++) {
         while (max > ret.filter(function (sign) { return sign; }).length) {
-          random_num = parseInt(Math.random() * max);
+          random_num = (Math.random() * max).toFixed(0);
           if (ret[random_num]) continue;
           ret[random_num] = true;
           num_ref.push(random_num);
@@ -149,23 +149,17 @@ Lotterior.prototype._builtInAlgorithm = {
 
   "IN-ORDER": function (collection, levels) {
     var max = collection.length;
-    var fst = parseInt(Math.random() * max);
+    var fst = (Math.random() * max).toFixed(0);
     var index = fst;
+    var counter = 0;
 
-    return levels.map(function (count) {
-      if (fst != index && fst == (index %= max))
-        return [];
-      
+    return levels.map(function (count, level) {
+      counter += (count = count > max - counter ? max - counter : count);
       var offset = index + count - max;
-      if (offset > 0) {
-        if (offset >= fst + 1) offset = fst;
-        tmp_index = index;
-        index += count;
-        return collection.slice(tmp_index).concat(collection.slice(0, offset));
-      } else {
-        if (count > fst + 1) count = fst;
+      if (offset > 0)
+        return collection.slice(index).concat(collection.slice(0, index = offset));
+      else
         return collection.slice(index, index += count);
-      }
     });
 
   }
@@ -176,6 +170,6 @@ Lotterior.prototype._builtInAlgorithm = {
 Lotterior.prototype.looping = function (interval, callback) {
   var max = this._pool.length;
   this._loop = setInterval(function () {
-    callback(parseInt(Math.random() * max));
+    callback((Math.random() * max).toFixed(0));
   }, interval);
 };
