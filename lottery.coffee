@@ -15,8 +15,7 @@ util = require 'util'
 ##
 ###
 
-module.exports = 
-class Lotterior extends EventEmitter
+module.exports = class Lotterior extends EventEmitter
   constructor: (options) ->
     return new Lotterior options if @constructor isnt Lotterior
     @_id = options?.id
@@ -38,8 +37,10 @@ class Lotterior extends EventEmitter
     @_levels = options.levels if util.isArray options?.levels
     @_pool = options.pool if util.isArray options?.pool
     @_candidates = options.candidates if util.isArray options?.candidates
-    if util.isString options?.algorithm and @_builtIn[options.algorithm]?
+    console.log @_builtIn[options.algorithm]?
+    if util.isString(options?.algorithm) and @_builtIn[options.algorithm]?
       @_algorithm = @_builtIn[options.algorithm]
+      console.log @_algorithm.toString()
     else if util.isFunction options?.algorithm
       @_algorithm = options.algorithm
     @
@@ -76,17 +77,18 @@ class Lotterior extends EventEmitter
 
   looping: (interval, callback) =>
     max = @_pool.length
-    @_loop = setInterval (-> callback (Math.random() * max).toFixed 0), interval
+    @_loop = setInterval (-> callback parseInt(Math.random() * max)), interval
 
   _builtIn: 
     "RANDOM": (collection, levels) ->
       max = collection.length
       ret = []
-      collection[random ret, max] for i in [0...(count)] for count in levels
+      for count in levels
+        collection[randNum] for i in [0...(count)] when (randNum = random ret, max)?
 
     "IN-ORDER": (collection, levels) ->
       max = collection.length
-      fst = (Math.random() * max).toFixed 0
+      fst = parseInt(Math.random() * max)
       index = fst
       counter = 0
 
@@ -110,9 +112,11 @@ Object.defineProperties Lotterior::, {
     configurable: no
 }
 
+Lotterior.initialize = (options) => new @ options
+
 random = (collection, max) ->
   while max > (sign for sign in collection when sign?).length
-    rand = (Math.random() * max).toFixed 0
+    rand = parseInt(Math.random() * max)
     continue if collection[rand]?
     collection[rand] = yes
     break

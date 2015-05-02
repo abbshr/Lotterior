@@ -19,11 +19,11 @@ Lotterior本质上是一个Pool("奖池"), 你可以对"奖池"进行配置.
 
 ### 初始化Lotterior
 
-有几种方式来初始化Lotterior:
+有几种方式来初始化Lotterior, settings可选:
 
-+ `lott = Lotterior.initialize([settings])`
-+ `lott = Lotterior([settings])`
-+ `lott = new Lotterior([settings])`
++ `lott = Lotterior.initialize [settings]`
++ `lott = Lotterior [settings] `
++ `lott = new Lotterior [settings] `
 
 ### `settings`对象
 
@@ -62,14 +62,12 @@ candidates具有最高优先级, 允许设置任何数据为获奖者, 而并不
 
 除了内置算法, 可以设置自定义的抽奖算法, 方法是设置algorithm为一个函数:
 
-```js
-var settings = {
-  // custom algorithm
-  algorithm: function (collection, levels) {
-    // collection: 奖池对象
-    // levels: 摇奖等级
-  }
-};
+```coffee
+settings = 
+  # custom algorithm
+  algorithm: (collection, levels) ->
+    # collection: 奖池对象
+    # levels: 摇奖等级
 ```
 
 ## 开奖模式
@@ -83,10 +81,14 @@ var settings = {
 #### `push(body)`
 开奖条件即满足奖池已被填满. 填充奖池通过push方法实现:
 
-```js
+```coffee
 // 将一个个体放入奖池
-lott.push("ran")
-lott.push({id:1, name:'ran', time: "2015-5-1"})
+lott.push "ran"
+lott.push {
+  id: 1
+  name:'ran'
+  time: "2015-5-1"
+}
 ```
 
 调用成功时push方法返回true, 表示该个体已被放入奖池, 返回false表示奖池已满, 改个体无法加入.
@@ -102,14 +104,14 @@ Lotterior本身也是一个EventEmitter, 每次开奖会触发`"ERNIE"`事件, �
 
 获奖者以一个二维数组表示:
 
-```js
+```coffee
   [ 
-    // 一等奖
-    ["ran", "ddd"],
-    // 二等奖
-    ["hr", "sss"],
-    // 三等奖
-    ["soufii", "ppp"],
+    # 一等奖
+    ["ran", "ddd"]
+    # 二等奖
+    ["hr", "sss"]
+    # 三等奖
+    ["soufii", "ppp"]
     ...
   ]
 ```
@@ -149,14 +151,15 @@ config方法允许对lott对象进行重新配置, 但只更新提供的字段.
 
 ## Usage
 
-```js
-var lott = Lotterior({ max: 10, levels: [5, 3, 1] });
-lott.on("ERNIE", function (winners) { console.log(winners) }).wait();
+```coffee
+Lott = require './lottery'
+lott = Lott max: 10, levels: [5, 3, 1]
+lott.on("ERNIE", (winners) -> console.log winners ).wait();
 
-// in other places ...
-lott.push(...)
-lott.push(...)
-lott.push(...)
+# in other places ...
+lott.push ...
+lott.push ...
+lott.push ...
 ...
 
 // => [ [a, b, c, d, e], [f, g, h], [i] ]

@@ -17,8 +17,8 @@ var EventEmitter = require('events').EventEmitter;
 var Lotterior = module.exports = function (options) {
   if (this.constructor !== Lotterior)
     return new Lotterior(options);
-
-  this._id = options && options.id;
+  options || (options = {});
+  this._id = options.id;
   this._summary = util.isNumber(options.summary) && options.summary > 0 ? options.summary : 0;
   this._round = util.isNumber(options.round) && options.round > 0 ? options.round : 1;
   this._max = util.isNumber(options.max) && options.max > 0 ? options.max : 1;
@@ -27,11 +27,11 @@ var Lotterior = module.exports = function (options) {
   this._candidates = util.isArray(options.candidates) ? options.candidates : [];
 
   if (util.isString(options.algorithm))
-    this._algorithm = this._builtInAlgorithm[options.algorithm] || this._builtInAlgorithm['IN-ORDER'];
+    this._algorithm = this._builtIn[options.algorithm] || this._builtIn['IN-ORDER'];
   else if (util.isFunction(options.algorithm))
     this._algorithm = options.algorithm;
   else
-    this._algorithm = this._builtInAlgorithm['IN-ORDER'];
+    this._algorithm = this._builtIn['IN-ORDER'];
 };
 
 util.inherits(Lotterior, EventEmitter);
@@ -41,33 +41,29 @@ Lotterior.initialize = function (options) {
 };
 
 // property: @full
-Object.defineProperty(Lotterior.prototype, 'full', {
-  get: function () { 
-    return this._pool.length >= this._max 
+Object.defineProperties(Lotterior.prototype, {
+  full: {
+    get: function () { 
+      return this._pool.length >= this._max 
+    },
+    configurable: false
   },
-  writeable: false,
-  configurable: false
-});
-
-// property: @count
-Object.defineProperty(Lotterior.prototype, 'count', {
-  get: function () {
-    return this._pool.length;
+  count: {
+    get: function () {
+      return this._pool.length;
+    },
+    configurable: false
   },
-  writeable: false,
-  configurable: false
-});
-
-// property: @round
-Object.defineProperty(Lotterior.prototype, 'round', {
-  get: function () {
-    return this._round;
-  },
-  writeable: false,
-  configurable: false
+  round: {
+    get: function () {
+      return this._round;
+    },
+    configurable: false
+  }
 });
 
 Lotterior.prototype.config = function (options) {
+  options || (options = {});
   if (util.isNumber(options.max) && options.max > 0)
     this._max = options.max;
   if (util.isArray(options.levels))
@@ -77,7 +73,7 @@ Lotterior.prototype.config = function (options) {
   if (util.isArray(options.candidates))
     this._candidates = options.candidates;
   if (util.isString(options.algorithm))
-    this._algorithm = this._builtInAlgorithm[options.algorithm] || this._builtInAlgorithm['IN-ORDER'];
+    this._algorithm = this._builtIn[options.algorithm] || this._builtIn['IN-ORDER'];
   else if (util.isFunction(options.algorithm))
     this._algorithm = options.algorithm;
   return this;
@@ -124,7 +120,7 @@ Lotterior.prototype._lottery = function () {
     this.emit('ERNIE', this._algorithm(this._pool, this._levels));
 };
 
-Lotterior.prototype._builtInAlgorithm = {
+Lotterior.prototype._builtIn = {
   "RANDOM": function (collection, levels) {
     var max = collection.length;
     var ret = [];
@@ -134,7 +130,7 @@ Lotterior.prototype._builtInAlgorithm = {
       var num_ref = [];
       for (var i = 0; i < count; i++) {
         while (max > ret.filter(function (sign) { return sign; }).length) {
-          random_num = (Math.random() * max).toFixed(0);
+          random_num = parseInt(Math.random() * max);
           if (ret[random_num]) continue;
           ret[random_num] = true;
           num_ref.push(random_num);
@@ -149,7 +145,7 @@ Lotterior.prototype._builtInAlgorithm = {
 
   "IN-ORDER": function (collection, levels) {
     var max = collection.length;
-    var fst = (Math.random() * max).toFixed(0);
+    var fst = parseInt(Math.random() * max);
     var index = fst;
     var counter = 0;
 
@@ -170,6 +166,6 @@ Lotterior.prototype._builtInAlgorithm = {
 Lotterior.prototype.looping = function (interval, callback) {
   var max = this._pool.length;
   this._loop = setInterval(function () {
-    callback((Math.random() * max).toFixed(0));
+    callback(parseInt(Math.random() * max));
   }, interval);
 };
