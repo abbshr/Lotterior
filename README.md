@@ -82,7 +82,7 @@ settings =
 开奖条件即满足奖池已被填满. 填充奖池通过push方法实现:
 
 ```coffee
-// 将一个个体放入奖池
+# 将一个个体放入奖池
 lott.push "ran"
 lott.push {
   id: 1
