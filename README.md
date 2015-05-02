@@ -3,13 +3,14 @@
 
 ![lottery](http://lewis-manning.co.uk/wp-content/uploads/2015/01/Lottery-Balls-014.jpg)
 
-A lottery machine for Node.js/io.js application, build with ❤ Node.js.
+A lottery machine for Node.js/io.js application, build with ❤ Node.js/CoffeeScript.
 
 **Lotterior曾用于一个微信公众账号摇奖系统的外包项目, 这个repo将其从原项目中分离, 可以为其他和抽奖具有相似模型的应用使用**
 
 ## TODO
 
-+ 增加浏览器端支持.
++ 浏览器端支持
++ CoffeeScript支持 √
 
 ## Introduction
 
