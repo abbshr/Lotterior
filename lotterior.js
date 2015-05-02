@@ -18,7 +18,7 @@ var Lotterior = module.exports = function (options) {
   if (this.constructor !== Lotterior)
     return new Lotterior(options);
 
-  this._id = options.id;
+  this._id = options && options.id;
   this._summary = util.isNumber(options.summary) && options.summary > 0 ? options.summary : 0;
   this._round = util.isNumber(options.round) && options.round > 0 ? options.round : 1;
   this._max = util.isNumber(options.max) && options.max > 0 ? options.max : 1;
