@@ -31,7 +31,7 @@ module.exports = class Lotterior extends EventEmitter
       options.algorithm
     else
       @_builtIn["IN-ORDER"]
-    
+
   config: (options) =>
     @_max = options.max if util.isNumber options?.max and options.max > 0
     @_levels = options.levels if util.isArray options?.levels
@@ -48,7 +48,7 @@ module.exports = class Lotterior extends EventEmitter
   push: (reward) =>
     return false if @full is yes
     @_pool.push reward
-    @summary++
+    @_summary++
     @full and @emit 'lottery'
     true
 
@@ -59,7 +59,7 @@ module.exports = class Lotterior extends EventEmitter
 
   wait: () =>
     if @full is yes
-      @_lottery() 
+      @_lottery()
     else if @listeners('lottery').length is 0
       @once 'lottery', @_lottery
     @
@@ -70,7 +70,7 @@ module.exports = class Lotterior extends EventEmitter
     @_lottery()
 
   _lottery: () =>
-    if @_candidates.length 
+    if @_candidates.length
       @emit 'ERNIE', @_candidates
     else
       @emit 'ERNIE', @_algorithm(@_pool, @_levels)
@@ -79,12 +79,12 @@ module.exports = class Lotterior extends EventEmitter
     max = @_pool.length
     @_loop = setInterval (-> callback parseInt(Math.random() * max)), interval
 
-  _builtIn: 
+  _builtIn:
     "RANDOM": (collection, levels) ->
       max = collection.length
       ret = []
       for count in levels
-        collection[randNum] for i in [0...(count)] when (randNum = random ret, max)?
+        collection[randNum] for i in [0...count] when (randNum = random ret, max)?
 
     "IN-ORDER": (collection, levels) ->
       max = collection.length
@@ -94,8 +94,7 @@ module.exports = class Lotterior extends EventEmitter
 
       for count, level in levels
         counter += (count = max - counter if count > max - counter)
-        offset = index + count - max
-        if offset > 0
+        if 0 < offset = index + count - max
           collection[index..].concat collection[0...index = offset]
         else
           collection[index...index += count]
