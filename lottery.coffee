@@ -43,7 +43,7 @@ module.exports = class Lotterior extends EventEmitter
       console.log @_algorithm.toString()
     else if util.isFunction options?.algorithm
       @_algorithm = options.algorithm
-    @
+    this
 
   push: (reward) =>
     return false if @full is yes
@@ -55,14 +55,14 @@ module.exports = class Lotterior extends EventEmitter
   flush: () =>
     @_round++
     @_pool = []
-    @
+    this
 
   wait: () =>
     if @full is yes
       @_lottery()
     else if @listeners('lottery').length is 0
       @once 'lottery', @_lottery
-    @
+    this
 
   lottery: () =>
     clearInterval @_loop
@@ -99,7 +99,7 @@ module.exports = class Lotterior extends EventEmitter
         else
           collection[index...index += count]
 
-Object.defineProperties Lotterior::, {
+Object.defineProperties Lotterior::,
   full:
     get: -> @_pool.length >= @_max
     configurable: no
@@ -109,7 +109,6 @@ Object.defineProperties Lotterior::, {
   count:
     get: -> @_pool.length
     configurable: no
-}
 
 Lotterior.initialize = (options) => new @ options
 

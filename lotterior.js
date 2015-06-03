@@ -1,9 +1,9 @@
 
-var util = require('util');
+var util = require('util'); 
 var EventEmitter = require('events').EventEmitter;
 
 /* lotterior settings */
-/* 
+/*
  * @id: pool's id
  * @summary: historical statistics. the numbers of `push()` called
  * @round: the nth round
@@ -43,8 +43,8 @@ Lotterior.initialize = function (options) {
 // property: @full
 Object.defineProperties(Lotterior.prototype, {
   full: {
-    get: function () { 
-      return this._pool.length >= this._max 
+    get: function () {
+      return this._pool.length >= this._max
     },
     configurable: false
   },
